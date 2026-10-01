@@ -1,0 +1,103 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { getPostUrl } from "@/utils/getPostPaths";
+import { toTransitionName } from "@/utils/toTransitionName";
+import Datetime from "./Datetime.astro";
+
+type Props = {
+  variant?: "h2" | "h3";
+} & CollectionEntry<"posts">;
+
+const { variant: Heading = "h2", id, data, filePath } = Astro.props;
+const { title, description, ...props } = data;
+---
+
+<li class="post-card">
+  <a
+    href={getPostUrl(id, filePath, Astro.currentLocale)}
+    class="post-card-link"
+  >
+    <Heading transition:name={toTransitionName(id)}>
+      {title}
+    </Heading>
+  </a>
+
+  <p class="post-description">{description}</p>
+
+  <Datetime {...props} class="post-date" />
+</li>
+
+<style>
+  .post-card {
+    position: relative;
+    margin-block: 1.5rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    transition:
+      background-color 0.3s ease,
+      box-shadow 0.3s ease,
+      transform 0.3s ease;
+  }
+
+  .post-card::before {
+    content: "";
+    position: absolute;
+    inset-block: 0.75rem;
+    inset-inline-start: 0;
+    width: 0.2rem;
+    border-radius: 999px;
+    background: var(--accent);
+    opacity: 0;
+    transform: scaleY(0.5);
+    transition:
+      opacity 0.3s ease,
+      transform 0.3s ease;
+  }
+
+  .post-card:hover {
+    background-color: color-mix(
+      in srgb,
+      var(--accent) 6%,
+      transparent
+    );
+
+    box-shadow:
+      0 0 2rem color-mix(in srgb, var(--accent) 8%, transparent),
+      inset 0 0 2rem color-mix(in srgb, var(--accent) 4%, transparent);
+
+    transform: translateY(-1px);
+  }
+
+  .post-card:hover::before {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+
+  .post-card-link {
+    display: inline-block;
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .post-card-link:hover {
+    text-decoration: underline;
+    text-decoration-style: dashed;
+    text-underline-offset: 0.25rem;
+  }
+
+  .post-card h2,
+  .post-card h3 {
+    margin: 0;
+    font-weight: 600;
+  }
+
+  .post-description {
+    margin-block: 0.4rem 0.75rem;
+    color: var(--foreground);
+    opacity: 0.85;
+  }
+
+  .post-date {
+    opacity: 0.9;
+  }
+</style>
