@@ -1,37 +1,15 @@
 ---
-title: "About"
-description: "A bit about me and this blog."
----
 
-AstroPaper is a minimal, accessible and SEO-friendly blog theme built with [Astro](https://astro.build/) and [Tailwind CSS](https://tailwindcss.com/).
+title: "درباره"
+description: "کمی درباره من و سی‌نوشت."
+---------------------------------------
 
-![Astro Paper](@/assets/images/astropaper-og.jpg)
+# سی‌نوشت
 
-AstroPaper provides a solid foundation for blogs, or even portfolios\_ with full markdown support, built-in dark mode, and a clean layout that works out-of-the-box.
+سی‌نوشت جایی است برای نوشتن چیزهایی که یاد می‌گیرم، به آن‌ها فکر می‌کنم و می‌سازم.
 
-The blog posts in this theme also serve as guides, docs or example articles\_ making AstroPaper a flexible starting point for your next content-driven site.
+اینجا قرار نیست همه‌چیز از قبل مرتب و کامل باشد. بعضی نوشته‌ها نتیجه‌ی یک تجربه‌اند، بعضی از یک سؤال شروع می‌شوند و بعضی شاید فقط تلاشی باشند برای اینکه یک ایده را بهتر بفهمم.
 
-## Features
+موضوعات اینجا می‌توانند از ابزارهای متن‌باز و نرم‌افزار گرفته تا یادگیری، نوشتن، زبان‌ها، ساختن چیزهای جدید و ایده‌هایی که ارزش فکر کردن دارند تغییر کنند.
 
-AstroPaper comes with a set of useful features that make content publishing easy and effective:
-
-- SEO-friendly
-- Fast performance
-- Light & dark mode
-- Highly customizable
-- Organizable blog posts
-- Responsive & accessible
-- Static search with [PageFind](https://pagefind.app/)
-- Automatic social image generation
-
-and so much more.
-
-## Show your support
-
-If you like [AstroPaper](https://github.com/satnaing/astro-paper), consider giving it a star ⭐️.
-
-Found a bug 🐛 or have an improvement ✨ in mind? Feel free to open an [issue](https://github.com/satnaing/astro-paper/issues), submit a [pull request](https://github.com/satnaing/astro-paper/pulls) or start a [discussion](https://github.com/satnaing/astro-paper/discussions).
-
-If you find this theme helpful, you can also [sponsor me on GitHub](https://github.com/sponsors/satnaing) or [buy me a coffee](https://buymeacoffee.com/satnaing) to show your support — every penny counts.
-
-Kyay zuu! 🙏🏼
+این سایت را عمداً ساده نگه می‌دارم؛ جایی برای یادداشت کردن، بازگشتن به ایده‌های قدیمی و شاید پیدا کردن چیزهایی که بعدها به کار دیگران هم بیاید.
