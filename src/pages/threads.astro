@@ -192,11 +192,26 @@ const hasOlderThreads = visibleStart > 0;
     text-decoration: underline;
   }
 
-  .thread-body {
-    position: relative;
-    max-height: 12rem;
-    overflow: hidden;
-  }
+    .thread-body {
+      position: relative;
+      max-height: 12rem;
+      overflow: hidden;
+    }
+
+    .thread-body.has-media {
+      max-height: none;
+    }
+
+    .thread-body :global(img),
+    .thread-body :global(audio) {
+      display: block;
+      margin-inline: auto;
+    }
+
+    .thread-body :global(img) {
+      max-width: 100%;
+      height: auto;
+    }
 
   .thread-body.is-collapsed::after {
     position: absolute;
@@ -329,7 +344,15 @@ const hasOlderThreads = visibleStart > 0;
         if (!body || !button) return;
 
         body.classList.remove("is-collapsed");
+        body.classList.remove("has-media");
         button.hidden = true;
+
+        const hasMedia = body.querySelector("img, audio");
+
+        if (hasMedia) {
+          body.classList.add("has-media");
+          return;
+        }
 
         if (body.scrollHeight > body.clientHeight + 4) {
           body.classList.add("is-collapsed");
