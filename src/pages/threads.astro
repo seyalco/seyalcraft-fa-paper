@@ -33,23 +33,25 @@ const hasOlderThreads = visibleStart > 0;
       </p>
     </section>
 
-    <section class="threads-list" aria-label="Threads">
-      {
-        renderedThreads.map(({ thread, Content }, index) => (
-          <>
-            {index === visibleStart && hasOlderThreads && (
-              <div class="older-threads">
-                <button
-                  id="load-older"
-                  type="button"
-                  aria-label="نمایش Threadهای قدیمی‌تر"
-                >
-                  <span class="older-arrow" aria-hidden="true">↑</span>
-                  <span>Threadهای قدیمی‌تر</span>
-                </button>
-              </div>
-            )}
+    <section class="threads-viewport" aria-label="Threads">
+      <div class="threads-list">
+        {
+          hasOlderThreads && (
+            <div class="older-threads" id="older-threads">
+              <button
+                id="load-older"
+                type="button"
+                aria-label="نمایش Threadهای قدیمی‌تر"
+              >
+                <span class="older-arrow" aria-hidden="true">↑</span>
+                <span>Threadهای قدیمی‌تر</span>
+              </button>
+            </div>
+          )
+        }
 
+        {
+          renderedThreads.map(({ thread, Content }, index) => (
             <article
               id={`thread-${thread.data.id}`}
               class:list={[
@@ -88,21 +90,26 @@ const hasOlderThreads = visibleStart > 0;
                   aria-expanded="false"
                 >
                   <span class="thread-expand-label">نمایش بیشتر</span>
-                  <span class="thread-expand-arrow" aria-hidden="true">↓</span>
+                  <span
+                    class="thread-expand-arrow"
+                    aria-hidden="true"
+                  >
+                    ↓
+                  </span>
                 </button>
               </div>
             </article>
-          </>
-        ))
-      }
+          ))
+        }
 
-      {
-        renderedThreads.length === 0 && (
-          <p class="threads-empty">
-            هنوز Threadی منتشر نشده است.
-          </p>
-        )
-      }
+        {
+          renderedThreads.length === 0 && (
+            <p class="threads-empty">
+              هنوز Threadی منتشر نشده است.
+            </p>
+          )
+        }
+      </div>
     </section>
   </main>
 
@@ -127,6 +134,24 @@ const hasOlderThreads = visibleStart > 0;
   .threads-header p {
     margin: 0;
     color: var(--text-color-light);
+  }
+
+  /*
+   * این viewport فعلاً فقط یک مرز منطقی برای feed است.
+   * ارتفاع آن را بعداً، پس از تست رفتار، نهایی می‌کنیم.
+   */
+  .threads-viewport {
+    position: relative;
+    height: 70vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+    overflow-anchor: none;
+  }
+
+  .threads-viewport::-webkit-scrollbar {
+    display: none;
   }
 
   .threads-list {
@@ -228,7 +253,6 @@ const hasOlderThreads = visibleStart > 0;
   }
 
   .older-threads {
-    order: 0;
     display: flex;
     justify-content: center;
     margin-block: 0.25rem;
@@ -285,6 +309,9 @@ const hasOlderThreads = visibleStart > 0;
     "#load-older"
   );
 
+  const olderThreads =
+    document.querySelector<HTMLElement>("#older-threads");
+
   function updateExpandableCards() {
     cards.forEach((card) => {
       const body = card.querySelector<HTMLElement>(".thread-body");
@@ -302,30 +329,53 @@ const hasOlderThreads = visibleStart > 0;
     });
   }
 
+  function positionOlderThreadsButton() {
+    if (!olderThreads) return;
+
+    const oldestVisibleCard = cards.find(
+      (card) => !card.classList.contains("thread-hidden")
+    );
+
+    if (oldestVisibleCard) {
+      oldestVisibleCard.before(olderThreads);
+    }
+  }
+
   function revealOlderThreads() {
     const hiddenCards = cards.filter((card) =>
       card.classList.contains("thread-hidden")
     );
 
     if (hiddenCards.length === 0) {
-      loadOlderButton?.parentElement?.remove();
+      olderThreads?.remove();
       return;
     }
 
-    const previousHeight = document.documentElement.scrollHeight;
+    const viewport =
+      document.querySelector<HTMLElement>(".threads-viewport");
+
+    if (!viewport) return;
+
+    const previousScrollHeight = viewport.scrollHeight;
+    const previousScrollTop = viewport.scrollTop;
 
     hiddenCards
       .slice(-batchSize)
-      .forEach((card) => card.classList.remove("thread-hidden"));
+      .forEach((card) => {
+        card.classList.remove("thread-hidden");
+      });
 
-    const newHeight = document.documentElement.scrollHeight;
+    positionOlderThreadsButton();
 
-    window.scrollBy(0, newHeight - previousHeight);
+    const newScrollHeight = viewport.scrollHeight;
+
+    viewport.scrollTop =
+      previousScrollTop + (newScrollHeight - previousScrollHeight);
 
     if (
       cards.every((card) => !card.classList.contains("thread-hidden"))
     ) {
-      loadOlderButton?.parentElement?.remove();
+      olderThreads?.remove();
     }
 
     updateExpandableCards();
@@ -353,7 +403,9 @@ const hasOlderThreads = visibleStart > 0;
       const label = button.querySelector(".thread-expand-label");
 
       if (label) {
-        label.textContent = expanded ? "نمایش کمتر" : "نمایش بیشتر";
+        label.textContent = expanded
+          ? "نمایش کمتر"
+          : "نمایش بیشتر";
       }
     });
   });
@@ -368,12 +420,28 @@ const hasOlderThreads = visibleStart > 0;
         card.classList.contains("thread-hidden")
       );
 
+      if (hiddenCards.length === 0) break;
+
       hiddenCards
         .slice(-batchSize)
-        .forEach((card) => card.classList.remove("thread-hidden"));
-
-      if (hiddenCards.length === 0) break;
+        .forEach((card) => {
+          card.classList.remove("thread-hidden");
+        });
     }
+
+    /*
+    * بعد از اینکه Thread هدف ظاهر شد، دکمه باید
+    * قبل از قدیمی‌ترین Thread قابل مشاهده قرار بگیرد.
+    */
+    const oldestVisibleCard = cards.find(
+      (card) => !card.classList.contains("thread-hidden")
+    );
+
+    if (oldestVisibleCard && olderThreads) {
+      oldestVisibleCard.before(olderThreads);
+    }
+
+    updateExpandableCards();
 
     return true;
   }
@@ -383,27 +451,52 @@ const hasOlderThreads = visibleStart > 0;
 
     if (!threadId) return;
 
+    const target = document.getElementById(`thread-${threadId}`);
+
+    if (!target) return;
+
     if (revealUntilThread(threadId)) {
       requestAnimationFrame(() => {
-        document
-          .getElementById(`thread-${threadId}`)
-          ?.scrollIntoView({ block: "center" });
+        const viewport =
+          document.querySelector<HTMLElement>(".threads-viewport");
+
+        if (!viewport) return;
+
+        /*
+        * اگر هنوز Thread قدیمی‌تری وجود دارد،
+        * ابتدای feed و دکمه «Threadهای قدیمی‌تر»
+        * باید در بالاترین قسمت viewport دیده شوند.
+        */
+        if (olderThreads && document.contains(olderThreads)) {
+          viewport.scrollTop = 0;
+          return;
+        }
+
+        /*
+        * اگر همه Threadها load شده‌اند، دیگر دکمه‌ای وجود ندارد.
+        * در این حالت خود Thread هدف را نمایش می‌دهیم.
+        */
+        target.scrollIntoView({
+          block: "center",
+        });
       });
     }
   }
 
+  positionOlderThreadsButton();
   updateExpandableCards();
 
   if (window.location.hash) {
     handleHash();
   } else if (cards.length > 0) {
-    window.scrollTo({
-      top: document.documentElement.scrollHeight,
-      behavior: "instant",
-    });
+    const viewport =
+      document.querySelector<HTMLElement>(".threads-viewport");
+
+    if (viewport) {
+      viewport.scrollTop = viewport.scrollHeight;
+    }
   }
 
   window.addEventListener("hashchange", handleHash);
-
   window.addEventListener("resize", updateExpandableCards);
 </script>
