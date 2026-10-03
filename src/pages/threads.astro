@@ -194,23 +194,26 @@ const hasOlderThreads = visibleStart > 0;
 
     .thread-body {
       position: relative;
-      max-height: 12rem;
+      max-height: var(--thread-preview-height, 12rem);
       overflow: hidden;
     }
 
-    .thread-body.has-media {
-      max-height: none;
-    }
-
     .thread-body :global(img),
+    .thread-body :global(video),
+    .thread-body :global(iframe),
     .thread-body :global(audio) {
       display: block;
       margin-inline: auto;
     }
 
-    .thread-body :global(img) {
+    .thread-body :global(img),
+    .thread-body :global(video) {
       max-width: 100%;
       height: auto;
+    }
+
+    .thread-body :global(iframe) {
+      max-width: 100%;
     }
 
   .thread-body.is-collapsed::after {
@@ -344,14 +347,28 @@ const hasOlderThreads = visibleStart > 0;
         if (!body || !button) return;
 
         body.classList.remove("is-collapsed");
-        body.classList.remove("has-media");
+        body.style.removeProperty("--thread-preview-height");
         button.hidden = true;
 
-        const hasMedia = body.querySelector("img, audio");
+        const media = Array.from(
+          body.querySelectorAll<HTMLElement>("img, video, iframe")
+        );
 
-        if (hasMedia) {
-          body.classList.add("has-media");
-          return;
+        const bodyRect = body.getBoundingClientRect();
+        let requiredHeight = body.clientHeight;
+
+        media.forEach((element) => {
+          const mediaRect = element.getBoundingClientRect();
+          const mediaBottom = mediaRect.bottom - bodyRect.top;
+
+          requiredHeight = Math.max(requiredHeight, mediaBottom);
+        });
+
+        if (requiredHeight > body.clientHeight) {
+          body.style.setProperty(
+            "--thread-preview-height",
+            `${requiredHeight}px`
+          );
         }
 
         if (body.scrollHeight > body.clientHeight + 4) {
@@ -518,6 +535,21 @@ const hasOlderThreads = visibleStart > 0;
     positionOlderThreadsButton();
     updateExpandableCards();
 
+    const mediaElements = Array.from(
+      document.querySelectorAll<HTMLElement>(
+        ".thread-body img, .thread-body video, .thread-body iframe"
+      )
+    );
+
+    const handleMediaLoad = () => {
+      updateExpandableCards();
+    };
+
+    mediaElements.forEach((media) => {
+      media.addEventListener("load", handleMediaLoad);
+      media.addEventListener("loadedmetadata", handleMediaLoad);
+    });
+
     if (window.location.hash) {
       handleHash();
     } else {
@@ -563,6 +595,14 @@ const hasOlderThreads = visibleStart > 0;
         if (!button) return;
 
         button.replaceWith(button.cloneNode(true));
+      });
+
+      mediaElements.forEach((media) => {
+        media.removeEventListener("load", handleMediaLoad);
+        media.removeEventListener(
+          "loadedmetadata",
+          handleMediaLoad
+        );
       });
 
       window.removeEventListener("hashchange", handleHash);
