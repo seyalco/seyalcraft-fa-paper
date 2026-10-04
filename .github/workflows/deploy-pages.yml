@@ -35,6 +35,12 @@ jobs:
           node-version: "24"
           cache: "pnpm"
 
+      - name: "🔎 Check pnpm configuration"
+        run: |
+          pnpm --version
+          cat pnpm-workspace.yaml
+          pnpm config get allowBuilds
+
       - name: "📦 Install dependencies"
         run: pnpm install --frozen-lockfile
 
