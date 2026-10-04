@@ -19,8 +19,13 @@ import {
 import { transformerFileName } from "./src/utils/transformers/fileName";
 import config from "./astro-paper.config";
 
+const isGitHubPages = process.env.GITHUB_ACTIONS === "true";
+
 export default defineConfig({
-  site: config.site.url,
+  site: isGitHubPages
+    ? "https://seyalco.github.io/seyalcraft-fa-paper/"
+    : config.site.url,
+  base: isGitHubPages ? "/seyalcraft-fa-paper" : undefined,
   integrations: [
     mdx(),
     sitemap({
