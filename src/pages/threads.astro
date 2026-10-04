@@ -386,7 +386,7 @@ const hasOlderThreads = visibleStart > 0;
       );
 
       if (oldestVisibleCard) {
-        oldestVisibleCard.before(olderThreads);
+        oldestVisibleCard.insertAdjacentElement("beforebegin", olderThreads);
       }
     }
 
@@ -487,7 +487,7 @@ const hasOlderThreads = visibleStart > 0;
       );
 
       if (oldestVisibleCard && olderThreads) {
-        oldestVisibleCard.before(olderThreads);
+        oldestVisibleCard.insertAdjacentElement("beforebegin", olderThreads);
       }
 
       updateExpandableCards();
